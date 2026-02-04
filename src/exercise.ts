@@ -42,21 +42,6 @@ export function parseUserConfig(input: string): Result<User> {
     return {ok: true, value: parsed};
 }
 
-const inputs = [
-    `{"id":"u1","email":"a@b.com","role":"intern"}`,
-    `{"id":"u2","email":"a@b.com","role":"boss"}`,
-    `{"id":123,"email":"ab.com","role":"intern"}`,
-];
-
-const invalidJSONArray = `[{"id":"u1","email":"a@b.com","role":"intern"},
-    {"id":"u2","email":"a@b.com","role":"boss"},
-    {"id":123,"email":"a@b.com","role":"intern"}]`;
-
-const validJSONArray = `
-[{"id":"u1","email":"a@b.com","role":"intern"},
-{"id":"u2","email":"a@b.com","role":"admin"},
-{"id":"u3","email":"a@b.com","role":"mentor"}]`;
-
 export function parseUsersConfig(input: string): Result<User[]> {
     const parsed = JSON.parse(input);
 
@@ -81,6 +66,21 @@ export function parseUsersConfig(input: string): Result<User[]> {
 
     return {ok: true, value: usersArray};
 }
+
+const inputs = [
+    `{"id":"u1","email":"a@b.com","role":"intern"}`, //valid
+    `{"id":"u2","email":"a@b.com","role":"boss"}`, //role type error
+    `{"id":123,"email":"ab.com","role":"intern"}`, //id, email format error
+];
+
+const invalidJSONArray = `[{"id":"u1","email":"a@b.com","role":"intern"},
+    {"id":"u2","email":"a@b.com","role":"boss"},
+    {"id":123,"email":"a@b.com","role":"intern"}]`;
+
+const validJSONArray = `
+[{"id":"u1","email":"a@b.com","role":"intern"},
+{"id":"u2","email":"a@b.com","role":"admin"},
+{"id":"u3","email":"a@b.com","role":"mentor"}]`;
 
 console.log('Inputs 0: ', parseUserConfig(inputs[0]));
 console.log('Inputs 1: ', parseUserConfig(inputs[1]));
