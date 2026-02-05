@@ -8,28 +8,30 @@ export type User = {
 
 export type Result<T> = {ok: true; value: T} | {ok: false; error: string};
 
-export function parseUserConfig(input: string): Result<User> {
-    const parsed = JSON.parse(input);
-    if (!(parsed && typeof parsed === 'object')) {
+function validateUser(raw: unknown): Result<User> {
+    if (!(raw && typeof raw === 'object')) {
         return {ok: false, error: 'Invalid JSON'};
     }
+
+    const data = raw as Record<string, unknown>;
     let errorString = '';
 
     const emailRegex = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/;
 
-    if (!('id' in parsed)) errorString += 'Missing field: id!';
-    if (!(typeof parsed.id === 'string'))
-        errorString += 'Invalid id type (expected string)!';
-    if (!('email' in parsed)) errorString += 'Missing field: email! ';
-    if (!(typeof parsed.email === 'string'))
+    if (!('id' in data)) errorString += 'Missing field: id!';
+    else if (!(typeof data.id === 'string'))
+        errorString += 'Invalid id type (expected string)! ';
+    if (!('email' in data)) errorString += 'Missing field: email! ';
+    else if (!(typeof data.email === 'string'))
         errorString += 'Invalid email type (expected string)!';
-    if (!emailRegex.test(parsed.email)) errorString += 'Invalid email format!';
-    if (!('role' in parsed)) errorString += 'Missing field: role!';
+    else if (!emailRegex.test(data.email))
+        errorString += 'Invalid email format!';
+    if (!('role' in data)) errorString += 'Missing field: role!';
     if (
         !(
-            parsed.role === 'intern' ||
-            parsed.role === 'mentor' ||
-            parsed.role === 'admin'
+            data.role === 'intern' ||
+            data.role === 'mentor' ||
+            data.role === 'admin'
         )
     )
         errorString +=
@@ -39,7 +41,18 @@ export function parseUserConfig(input: string): Result<User> {
         return {ok: false, error: errorString};
     }
 
-    return {ok: true, value: parsed};
+    const user: User = {
+        id: data.id as string,
+        email: data.email as string,
+        role: data.role as Role,
+    };
+
+    return {ok: true, value: user};
+}
+
+export function parseUserConfig(input: string): Result<User> {
+    const parsed = JSON.parse(input);
+    return validateUser(parsed);
 }
 
 export function parseUsersConfig(input: string): Result<User[]> {
@@ -56,7 +69,7 @@ export function parseUsersConfig(input: string): Result<User[]> {
     let usersArray: User[] = [];
 
     for (let element of parsed) {
-        let result = parseUserConfig(JSON.stringify(element));
+        let result = validateUser(element);
 
         if (!result.ok) {
             return {ok: false, error: 'Invalid User shape'};
