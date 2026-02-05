@@ -27,7 +27,7 @@ function validateUser(raw: unknown): Result<User> {
     else if (!emailRegex.test(data.email))
         errorString += 'Invalid email format!';
     if (!('role' in data)) errorString += 'Missing field: role!';
-    if (
+    else if (
         !(
             data.role === 'intern' ||
             data.role === 'mentor' ||
